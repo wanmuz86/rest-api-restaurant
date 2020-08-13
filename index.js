@@ -4,10 +4,14 @@ const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
 const Restaurant = require('./restaurant')
 const User = require('./user')
+const auth = require('./auth')()
+const jwt = require('jsonwebtoken');
+const config = require('./config');
 mongoose.connect('mongodb+srv://apiuser:abcd1234@cluster0.agh0w.mongodb.net/rest-api?retryWrites=true&w=majority')
 
 app.use(bodyParser.urlencoded({extended:true}))
 app.use(bodyParser.json())
+app.use(auth.initialize())
 
 const port = process.env.PORT || 8080;
 
@@ -111,7 +115,10 @@ User.findOne({username:req.body.username}).then(user=>{
 				res.json({message:'Wrong password'})
 			}
 			else {
-				res.json({message:'Authenticated'})
+				const token = jwt.sign(user.toJSON(), config.secret, {
+					expiresIn: 10080
+				});
+				res.json({message:"success",token: 'JWT '+token})
 			}
 	})
 }

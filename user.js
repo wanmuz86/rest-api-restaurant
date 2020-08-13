@@ -24,11 +24,11 @@ userSchema.pre('save', function(callback){
 // is an encryption of password sent
 
 //It will not decrypt - > Normally a password that is hashed + salt will take years to be decrypted
-userSchema.methods.verifyPassword = function(password, callback){
-	bcrypt.compare(password,this.password, function(err,isMatch){
-		if(err) return callback(err);
-		callback(null, isMatch);
-	})
+userSchema.methods.verifyPassword = function(password, callback) {
+    bcrypt.compare(password, this.password, (err, isMatch) => {
+        if (err) throw callback(err);
+        callback(null, isMatch)
+    });
 }
 
 module.exports = mongoose.model('User',userSchema);
