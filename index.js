@@ -21,7 +21,7 @@ router.get('/', (req,res)=>{
 	res.json({message:'hooray! welcome to our API!'});
 })
 
-router.post('/restaurants',(req,res)=>{
+router.post('/restaurants',auth.authenticate(),(req,res)=>{
 	let newRestaurant = new Restaurant({
 		name:req.body.name,
 		address:req.body.address,
@@ -99,38 +99,78 @@ newUser.save().then(doc=>{
 //This is Read- for login, we need to use POST because it is more secure
 router.post('/login', (req,res)=>{
 
-// Readd
-User.findOne({username:req.body.username}).then(user=>{
-	console.log(user)
-	if (user){
-	// if (req.body.password == user.password){
-	// 	res.json({message:'Authenticated'});
-	// }
-	// else {
-	// 	res.json({message:'Wrong password'})
-	// }
-	user.verifyPassword(req.body.password,function(err,isMatch){
-		if (err) res.json({message:'Something is wrong'})
-			if (!isMatch){
-				res.json({message:'Wrong password'})
-			}
-			else {
-				const token = jwt.sign(user.toJSON(), config.secret, {
-					expiresIn: 10080
-				});
-				res.json({message:"success",token: 'JWT '+token})
-			}
+
+	User.findOne({username:req.body.username}).then(user=>{
+		console.log(user)
+		if (user){
+			user.verifyPassword(req.body.password,function(err,isMatch){
+				if (err) res.json({message:'Something is wrong'})
+					if (!isMatch){
+						res.json({message:'Wrong password'})
+					}
+					else {
+						const token = jwt.sign(user.toJSON(), config.secret, {
+							expiresIn: 10080
+						});
+						res.json({message:"success",token: 'JWT '+token})
+					}
+				})
+		}
+		else {
+			res.json({message:'User not found!'})
+		}
+	}).catch(err=>{
+		res.json({message:'An error occured '+err});
 	})
-}
-else {
-	res.json({message:'User not found!'})
-}
-}).catch(err=>{
-	res.json({message:'An error occured '+err});
-})
 })
 
+router.post('/restaurants/:id/menus', (req,res)=>{
+	Restaurant.findById(req.params.id)
+	.then(doc=>{
+		const newMenu = {
+			name:req.body.name,
+			description:req.body.description,
+			price:req.body.price,
+			imageUrl:req.body.image_url
+		}
+		doc.menus.push(newMenu)
+		doc.save().then(doc=>{
+			res.json({message:"menu succesfully added!"})
+		}).catch(err=>{
+			res.json({message:"error "+err})
+		})
 
+	}).catch(err=>{
+		res.json({message:"error "+err})
+	})
+	
+})
+
+router.get('/restaurants/:id/menus', (req,res)=>{
+
+})
+
+router.get('/restaurants/:res_id/menus/:menu_id', (req,res)=>{
+	
+})
+router.put('/restaurants/:res_id/menus/:menu_id', (req,res)=>{
+	
+})
+router.delete('/restaurants/:res_id/menus/:menu_id', (req,res)=>{
+	
+})
+
+router.post('/restaurants/:id/reviews', (req,res)=>{
+
+})
+
+router.get('/restaurants/:id/reviews', (req,res)=>{
+
+})
+
+router.get('/restaurants/:restaurant_id/reviews', (req,res)=>{
+
+})
 
 app.use('/api',router);
 
