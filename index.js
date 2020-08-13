@@ -160,8 +160,26 @@ router.delete('/restaurants/:res_id/menus/:menu_id', (req,res)=>{
 	
 })
 
-router.post('/restaurants/:id/reviews', (req,res)=>{
 
+router.post('/restaurants/:id/reviews', (req,res) =>{
+	console.log("here ")
+    Restaurant.findById(req.params.id).then(doc => {
+        let newRating =  {
+            username: req.body.username,
+            rating: req.body.rating,
+            review:req.body.review
+        }
+        doc.reviews.push(newRating)
+        console.log("here 1")
+        doc.save().then(doc => {
+        	console.log(" here 2")
+            res.json({message: 'Rating added succesfully'})
+        }).catch(err => {
+            res.json({message: 'An error occured ' + err})
+        })
+    }).catch(err => {
+        res.json({message: "error "+err})
+    })
 })
 
 router.get('/restaurants/:id/reviews', (req,res)=>{
